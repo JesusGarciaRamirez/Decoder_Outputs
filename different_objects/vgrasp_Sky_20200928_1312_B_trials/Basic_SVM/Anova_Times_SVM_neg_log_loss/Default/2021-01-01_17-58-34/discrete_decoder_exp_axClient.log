@@ -1,0 +1,116 @@
+[2021-01-01 17:58:34,392][__main__][INFO] - ============= Configuration =============
+[2021-01-01 17:58:34,423][__main__][INFO] - Config:
+gen_strategy:
+  n_sobol: 30
+  n_gpei: 60
+metric_dict:
+  scorer:
+  - sklearn
+  - sklearn
+  - sklearn
+  score_fcn:
+  - neg_log_loss
+  - f1_weighted
+  - accuracy
+obj_name: neg_log_loss
+minimize: false
+data:
+  root_dir: C:\Users\jesga\OneDrive\Desktop\NeuroscienceLeuven\RawData\consecutiveDays_DifferentObjects
+  dataset: vgrasp_Sky_20200928_1312_B_trials
+  data_path: ${data.root_dir}/${data.dataset}.pkl
+exp:
+  type: different_objects
+output_dir: ${hydra:run.dir}
+trial:
+  name: Default
+  params:
+    preprocessing__rates_comp__event: Target
+    preprocessing__rates_comp__t_skip: 500
+    preprocessing__rates_comp__t_int: 200
+    preprocessing__rates_comp__n_bins: 1
+    preprocessing__rates_comp__continuousDecoding: 0
+pipeline:
+  name: Basic_SVM
+  pipeline_arch:
+    preprocessing:
+    - rates_comp
+    - tuning_filter
+    - scaler
+    - kbest_anova
+    feature_extraction:
+    - factor_analysis
+    classifier:
+    - svm
+optimization:
+  name: Anova_Times_SVM
+  space:
+    preprocessing__rates_comp__t_int:
+      type: range
+      bounds:
+      - 200
+      - 700
+      value_type: float
+      log_scale: false
+    preprocessing__rates_comp__t_skip:
+      type: range
+      bounds:
+      - 100
+      - 600
+      value_type: float
+      log_scale: false
+    preprocessing__tuning_filter__k:
+      type: range
+      bounds:
+      - 60
+      - 105
+      value_type: int
+      log_scale: false
+    preprocessing__kbest_anova__k:
+      type: range
+      bounds:
+      - 5
+      - 60
+      value_type: int
+      log_scale: false
+    feature_extraction__factor_analysis__n_components:
+      type: range
+      bounds:
+      - 2
+      - 30
+      value_type: int
+      log_scale: false
+    classifier__svm__C:
+      type: range
+      bounds:
+      - 0.1
+      - 100
+      value_type: float
+      log_scale: true
+    classifier__svm__gamma:
+      type: range
+      bounds:
+      - 0.0001
+      - 10
+      value_type: float
+      log_scale: true
+    classifier__svm__probability:
+      type: fixed
+      value: true
+      value_type: bool
+  space_constraints:
+    anova_leq_fa: preprocessing__kbest_anova__k >= feature_extraction__factor_analysis__n_components
+    kfilter_leq_anova: preprocessing__tuning_filter__k >= preprocessing__kbest_anova__k
+    constant_times: preprocessing__rates_comp__t_int + preprocessing__rates_comp__t_skip
+      <= 900
+
+[2021-01-01 17:58:34,455][__main__][INFO] - =========================================
+[2021-01-01 18:33:45,786][papermill][INFO] - Input Notebook:  C:\Users\jesga\OneDrive\Desktop\NeuroscienceLeuven\Code\Decodingv7\tests\OptReport.ipynb
+[2021-01-01 18:33:45,787][papermill][INFO] - Output Notebook: outputs/different_objects/vgrasp_Sky_20200928_1312_B_trials/Basic_SVM/Anova_Times_SVM_neg_log_loss/Default\2021-01-01_17-58-34\OptReport.ipynb
+[2021-01-01 18:33:46,585][blib2to3.pgen2.driver][INFO] - Generating grammar tables from C:\Users\jesga\anaconda3\envs\NeuroEnv\lib\site-packages\blib2to3\Grammar.txt
+[2021-01-01 18:33:46,663][blib2to3.pgen2.driver][INFO] - Writing grammar tables to C:\Users\jesga\AppData\Local\black\black\Cache\20.8b1\Grammar3.8.5.final.0.pickle
+[2021-01-01 18:33:46,665][blib2to3.pgen2.driver][INFO] - Writing failed: [Errno 2] No such file or directory: 'C:\\Users\\jesga\\AppData\\Local\\black\\black\\Cache\\20.8b1\\tmp9wwyj2uf'
+[2021-01-01 18:33:46,677][blib2to3.pgen2.driver][INFO] - Generating grammar tables from C:\Users\jesga\anaconda3\envs\NeuroEnv\lib\site-packages\blib2to3\PatternGrammar.txt
+[2021-01-01 18:33:46,686][blib2to3.pgen2.driver][INFO] - Writing grammar tables to C:\Users\jesga\AppData\Local\black\black\Cache\20.8b1\PatternGrammar3.8.5.final.0.pickle
+[2021-01-01 18:33:46,694][blib2to3.pgen2.driver][INFO] - Writing failed: [Errno 2] No such file or directory: 'C:\\Users\\jesga\\AppData\\Local\\black\\black\\Cache\\20.8b1\\tmpyw162wa4'
+[2021-01-01 18:33:50,285][papermill][INFO] - Executing notebook with kernel: python3
+[2021-01-01 18:36:55,932][papermill][WARNING] - Autosave too slow: 16.08 sec, over 25% limit. Backing off to 60 sec

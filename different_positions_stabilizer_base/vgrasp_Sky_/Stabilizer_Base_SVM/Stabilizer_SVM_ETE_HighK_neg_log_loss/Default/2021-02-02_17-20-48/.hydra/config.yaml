@@ -1,0 +1,110 @@
+model: stabilizer_decoder_base
+base_optimization: true
+base_dir: C:\Users\jesga\OneDrive\Desktop\NeuroscienceLeuven
+gen_strategy:
+  n_sobol: 35
+  n_gpei: 55
+metric_dict:
+  scorer:
+  - sklearn
+  - sklearn
+  - sklearn
+  score_fcn:
+  - neg_log_loss
+  - f1_weighted
+  - accuracy
+obj_name: neg_log_loss
+minimize: false
+data:
+  root_dir: ${base_dir}/RawData/MultiDaysDatasets/different_positions
+  used_datasets:
+  - 20200703_0936_A_trials
+  n_days: 1
+  task_id: vgrasp_Sky_
+exp:
+  type: different_positions_stabilizer_base
+  base_dir: ${base_dir}/Code
+  tracking:
+    root_dir: ${exp.base_dir}/experimentTracking
+    table_name: different_positions_multi.csv
+    save_metric: ${obj_name}
+reports:
+  base_folder: ${base_dir}/Code/bcidecode/bcidecode/reports
+  notebooks:
+  - OptReport
+  params:
+  - root_dir: None
+output_dir: ${hydra:run.dir}
+trial:
+  name: Default
+  params:
+    preprocessing__rates_comp__event: Target
+    preprocessing__rates_comp__t_skip: 194.93
+    preprocessing__rates_comp__t_int: 705.07
+    preprocessing__rates_comp__n_bins: 1
+    preprocessing__rates_comp__continuousDecoding: 0
+pipeline:
+  name: Stabilizer_Base_SVM
+  pipeline_arch:
+    decoder:
+      preprocessing:
+      - rates_comp
+      - tuning_filter
+      - scaler
+      - kbest_anova
+      feature_extraction:
+      - factor_analysis
+      classifier:
+      - svm
+    manifold:
+      preprocessing:
+      - rates_comp
+      - concat_transformer
+      - scaler
+      feature_extraction:
+      - factor_analysis
+optimization:
+  name: Stabilizer_SVM_ETE_HighK
+  space:
+    preprocessing__tuning_filter__k:
+      type: range
+      bounds:
+      - 100
+      - 128
+      value_type: int
+      log_scale: false
+    preprocessing__kbest_anova__k:
+      type: range
+      bounds:
+      - 100
+      - 128
+      value_type: int
+      log_scale: false
+    feature_extraction__factor_analysis__n_components:
+      type: range
+      bounds:
+      - 10
+      - 20
+      value_type: int
+      log_scale: false
+    classifier__svm__C:
+      type: range
+      bounds:
+      - 0.1
+      - 100
+      value_type: float
+      log_scale: true
+    classifier__svm__gamma:
+      type: range
+      bounds:
+      - 0.0001
+      - 10
+      value_type: float
+      log_scale: true
+    classifier__svm__probability:
+      type: fixed
+      value: true
+      value_type: bool
+  space_constraints:
+    anova_leq_fa: preprocessing__kbest_anova__k >= feature_extraction__factor_analysis__n_components
+    kfilter_leq_anova: preprocessing__tuning_filter__k >= preprocessing__kbest_anova__k

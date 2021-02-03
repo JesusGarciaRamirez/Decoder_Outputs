@@ -1,0 +1,126 @@
+[2020-12-23 20:00:43,640][__main__][INFO] - ============= Configuration =============
+[2020-12-23 20:00:43,668][__main__][INFO] - Config:
+gen_strategy:
+  n_sobol: 40
+  n_gpei: 60
+metric_dict:
+  scorer:
+  - sklearn
+  - sklearn
+  score_fcn:
+  - f1_weighted
+  - accuracy
+obj_name: f1_weighted
+minimize: false
+data:
+  root_dir: C:\Users\jesga\OneDrive\Desktop\NeuroscienceLeuven\RawData\consecutiveDays_DifferentObjects
+  dataset: vgrasp_Sky_20200928_1312_B_trials
+  data_path: ${data.root_dir}/${data.dataset}.pkl
+exp:
+  type: different_objects
+output_dir: ${hydra:run.dir}
+trial_params:
+  alignmentEvent: Target
+  timeBeforeEvent: -150
+  timeAfterEvent: 350
+  binWidth: 200
+  n_bins": 1
+pipeline:
+  name: RF_ModelSelector
+  pipeline_arch:
+    preprocessing:
+    - rates_comp
+    - tuning_filter
+    - model_filter
+    - scaler
+    feature_extraction:
+    - factor_analysis
+    classifier:
+    - rf
+optimization:
+  name: RF_Tint
+  space:
+    preprocessing__rates_comp__t_int:
+      type: range
+      bounds:
+      - 100
+      - 800
+      value_type: int
+      log_scale: false
+    preprocessing__tuning_filter__k:
+      type: range
+      bounds:
+      - 60
+      - 110
+      value_type: int
+      log_scale: false
+    preprocessing__model_filter__max_features:
+      type: range
+      bounds:
+      - 10
+      - 90
+      value_type: int
+      log_scale: false
+    feature_extraction__factor_analysis__n_components:
+      type: range
+      bounds:
+      - 2
+      - 30
+      value_type: int
+      log_scale: false
+    classifier__rf__max_depth:
+      type: range
+      bounds:
+      - 1
+      - 6
+      value_type: int
+      log_scale: false
+    classifier__rf__n_estimators:
+      type: range
+      bounds:
+      - 100
+      - 200
+      value_type: int
+      log_scale: false
+    classifier__rf__oob_score:
+      type: fixed
+      value: 1
+      value_type: bool
+      log_scale: false
+    classifier__rf__max_features:
+      type: choice
+      values:
+      - auto
+      - sqrt
+      - log2
+      value_type: str
+      log_scale: false
+    classifier__rf__min_impurity_decrease:
+      type: range
+      bounds:
+      - 0.01
+      - 2
+      value_type: float
+      log_scale: true
+    classifier__rf__min_weight_fraction_leaf:
+      type: range
+      bounds:
+      - 0.03
+      - 0.3
+      value_type: float
+      log_scale: true
+  space_constraints:
+    kvariance_leq_filter: preprocessing__tuning_filter__k >= preprocessing__model_filter__max_features
+    filter_leq_fa: preprocessing__model_filter__max_features >= feature_extraction__factor_analysis__n_components
+
+[2020-12-23 20:00:43,702][__main__][INFO] - =========================================
+[2020-12-23 20:38:24,320][papermill][INFO] - Input Notebook:  C:\Users\jesga\OneDrive\Desktop\NeuroscienceLeuven\Code\Decodingv7\tests\OptReport.ipynb
+[2020-12-23 20:38:24,321][papermill][INFO] - Output Notebook: outputs/different_objects/vgrasp_Sky_20200928_1312_B_trials/RF_ModelSelector/RF_Tint_f1_weighted/200\2020-12-23_20-00-43\OptReport.ipynb
+[2020-12-23 20:38:26,296][blib2to3.pgen2.driver][INFO] - Generating grammar tables from C:\Users\jesga\anaconda3\envs\NeuroEnv\lib\site-packages\blib2to3\Grammar.txt
+[2020-12-23 20:38:26,387][blib2to3.pgen2.driver][INFO] - Writing grammar tables to C:\Users\jesga\AppData\Local\black\black\Cache\20.8b1\Grammar3.8.5.final.0.pickle
+[2020-12-23 20:38:26,389][blib2to3.pgen2.driver][INFO] - Writing failed: [Errno 2] No such file or directory: 'C:\\Users\\jesga\\AppData\\Local\\black\\black\\Cache\\20.8b1\\tmpsxfwa5t9'
+[2020-12-23 20:38:26,409][blib2to3.pgen2.driver][INFO] - Generating grammar tables from C:\Users\jesga\anaconda3\envs\NeuroEnv\lib\site-packages\blib2to3\PatternGrammar.txt
+[2020-12-23 20:38:26,423][blib2to3.pgen2.driver][INFO] - Writing grammar tables to C:\Users\jesga\AppData\Local\black\black\Cache\20.8b1\PatternGrammar3.8.5.final.0.pickle
+[2020-12-23 20:38:26,442][blib2to3.pgen2.driver][INFO] - Writing failed: [Errno 2] No such file or directory: 'C:\\Users\\jesga\\AppData\\Local\\black\\black\\Cache\\20.8b1\\tmp_zh6y01u'
+[2020-12-23 20:38:30,975][papermill][INFO] - Executing notebook with kernel: python3
+[2020-12-23 20:44:57,774][papermill][WARNING] - Autosave too slow: 26.12 sec, over 25% limit. Backing off to 60 sec

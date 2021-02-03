@@ -1,0 +1,77 @@
+gen_strategy:
+  n_sobol: 15
+  n_gpei: 60
+metric_dict:
+  scorer:
+  - sklearn
+  - sklearn
+  score_fcn:
+  - f1_weighted
+  - accuracy
+obj_name: f1_weighted
+minimize: false
+data:
+  root_dir: C:\Users\jesga\OneDrive\Desktop\NeuroscienceLeuven\RawData\consecutiveDays_DifferentObjects
+  dataset: vgrasp_Sky_20200928_1312_B_trials
+  data_path: ${data.root_dir}/${data.dataset}.pkl
+exp:
+  type: different_objects
+output_dir: ${hydra:run.dir}
+trial_params:
+  alignmentEvent: Target
+  timeBeforeEvent: -150
+  timeAfterEvent: 350
+  binWidth: 200
+  n_bins": 1
+pipeline:
+  name: SVM_LDA
+  pipeline_arch:
+    preprocessing:
+    - rates_comp
+    - tuning_filter
+    - anova_filter
+    - scaler
+    feature_extraction:
+    - factor_analysis
+    - scaler
+    - lda
+    classifier:
+    - svm
+optimization:
+  name: Basic_SVM
+  space:
+    preprocessing__anova_filter__k:
+      type: range
+      bounds:
+      - 10
+      - 80
+      value_type: int
+      log_scale: false
+    feature_extraction__factor_analysis__n_components:
+      type: range
+      bounds:
+      - 2
+      - 30
+      value_type: int
+      log_scale: false
+    preprocessing__tuning_filter__rate_threshold:
+      type: fixed
+      value: 5
+      value_type: int
+      log_scale: false
+    classifier__svm__C:
+      type: range
+      bounds:
+      - 0.1
+      - 100
+      value_type: float
+      log_scale: true
+    classifier__svm__gamma:
+      type: range
+      bounds:
+      - 0.0001
+      - 10
+      value_type: float
+      log_scale: true
+  space_constraints:
+    anova_leq_fa: preprocessing__anova_filter__k >= feature_extraction__factor_analysis__n_components

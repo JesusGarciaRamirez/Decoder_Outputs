@@ -1,0 +1,114 @@
+[2021-01-10 17:00:11,360][__main__][INFO] - ============= Configuration =============
+[2021-01-10 17:00:11,384][__main__][INFO] - Config:
+model: basic_decoder
+base_optimization: true
+gen_strategy:
+  n_sobol: 2
+  n_gpei: 2
+metric_dict:
+  scorer:
+  - sklearn
+  - sklearn
+  - sklearn
+  score_fcn:
+  - neg_log_loss
+  - f1_weighted
+  - accuracy
+obj_name: neg_log_loss
+minimize: false
+data:
+  root_dir: C:\Users\jesga\OneDrive\Desktop\NeuroscienceLeuven\RawData\consecutiveDays_DifferentObjects
+  dataset: vgrasp_Sky_20200928_1312_B_trials
+  data_path: ${data.root_dir}/${data.dataset}.pkl
+exp:
+  type: different_objects
+  base_dir: C:\Users\jesga\OneDrive\Desktop\NeuroscienceLeuven\Code
+  tracking:
+    root_dir: ${exp.base_dir}/experimentTracking
+    table_name: different_objects_all.csv
+    save_metric: accuracy
+reports:
+  base_folder: null
+  notebooks:
+  - OptReport
+  - EDA
+  params:
+  - root_dir: None
+  - root_dir: None
+    metric: ${exp.tracking.save_metric}
+    embedder: lda
+output_dir: ${hydra:run.dir}
+trial:
+  name: Default
+  params:
+    preprocessing__rates_comp__event: Target
+    preprocessing__rates_comp__t_skip: 500
+    preprocessing__rates_comp__t_int: 200
+    preprocessing__rates_comp__n_bins: 1
+    preprocessing__rates_comp__continuousDecoding: 0
+pipeline:
+  name: LDA_SVM
+  pipeline_arch:
+    preprocessing:
+    - rates_comp
+    - tuning_filter
+    - scaler
+    - kbest_anova
+    feature_extraction:
+    - lda
+    classifier:
+    - svm
+optimization:
+  name: LDA_Times_SVM
+  space:
+    preprocessing__rates_comp__t_int:
+      type: range
+      bounds:
+      - 200
+      - 700
+      value_type: float
+      log_scale: false
+    preprocessing__rates_comp__t_skip:
+      type: range
+      bounds:
+      - 100
+      - 600
+      value_type: float
+      log_scale: false
+    preprocessing__tuning_filter__k:
+      type: range
+      bounds:
+      - 60
+      - 105
+      value_type: int
+      log_scale: false
+    preprocessing__kbest_anova__k:
+      type: range
+      bounds:
+      - 5
+      - 60
+      value_type: int
+      log_scale: false
+    classifier__svm__C:
+      type: range
+      bounds:
+      - 0.1
+      - 100
+      value_type: float
+      log_scale: true
+    classifier__svm__gamma:
+      type: range
+      bounds:
+      - 0.0001
+      - 10
+      value_type: float
+      log_scale: true
+    classifier__svm__probability:
+      type: fixed
+      value: true
+      value_type: bool
+  space_constraints:
+    kfilter_leq_anova: preprocessing__tuning_filter__k >= preprocessing__kbest_anova__k
+    constant_times: preprocessing__rates_comp__t_int + preprocessing__rates_comp__t_skip
+      <= 900
+

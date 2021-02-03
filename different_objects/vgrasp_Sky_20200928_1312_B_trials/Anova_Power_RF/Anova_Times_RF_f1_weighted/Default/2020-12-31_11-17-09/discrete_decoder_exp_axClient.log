@@ -1,0 +1,128 @@
+[2020-12-31 11:17:09,527][__main__][INFO] - ============= Configuration =============
+[2020-12-31 11:17:09,567][__main__][INFO] - Config:
+gen_strategy:
+  n_sobol: 15
+  n_gpei: 65
+metric_dict:
+  scorer:
+  - sklearn
+  - sklearn
+  score_fcn:
+  - f1_weighted
+  - accuracy
+obj_name: f1_weighted
+minimize: false
+data:
+  root_dir: C:\Users\jesga\OneDrive\Desktop\NeuroscienceLeuven\RawData\consecutiveDays_DifferentObjects
+  dataset: vgrasp_Sky_20200928_1312_B_trials
+  data_path: ${data.root_dir}/${data.dataset}.pkl
+exp:
+  type: different_objects
+output_dir: ${hydra:run.dir}
+trial:
+  name: Default
+  params:
+    preprocessing__rates_comp__event: Target
+    preprocessing__rates_comp__t_skip: 500
+    preprocessing__rates_comp__t_int: 200
+    preprocessing__rates_comp__n_bins: 1
+    preprocessing__rates_comp__continuousDecoding: 0
+pipeline:
+  name: Anova_Power_RF
+  pipeline_arch:
+    preprocessing:
+    - rates_comp
+    - tuning_filter
+    - power_transformer
+    - kbest_anova
+    feature_extraction:
+    - factor_analysis
+    classifier:
+    - rf
+optimization:
+  name: Anova_Times_RF
+  space:
+    preprocessing__rates_comp__t_int:
+      type: range
+      bounds:
+      - 100
+      - 700
+      value_type: int
+      log_scale: false
+    preprocessing__rates_comp__t_skip:
+      type: range
+      bounds:
+      - 200
+      - 700
+      value_type: int
+      log_scale: false
+    preprocessing__kbest_anova__k:
+      type: range
+      bounds:
+      - 5
+      - 60
+      value_type: int
+      log_scale: false
+    feature_extraction__factor_analysis__n_components:
+      type: range
+      bounds:
+      - 2
+      - 30
+      value_type: int
+      log_scale: false
+    preprocessing__tuning_filter__k:
+      type: range
+      bounds:
+      - 60
+      - 110
+      value_type: int
+      log_scale: false
+    classifier__rf__max_depth:
+      type: range
+      bounds:
+      - 1
+      - 6
+      value_type: int
+      log_scale: false
+    classifier__rf__n_estimators:
+      type: range
+      bounds:
+      - 100
+      - 400
+      value_type: int
+      log_scale: false
+    classifier__rf__oob_score:
+      type: fixed
+      value: 1
+      value_type: bool
+      log_scale: false
+    classifier__rf__max_features:
+      type: choice
+      values:
+      - auto
+      - sqrt
+      - log2
+      value_type: str
+      log_scale: false
+    classifier__rf__min_impurity_decrease:
+      type: range
+      bounds:
+      - 0.01
+      - 2
+      value_type: float
+      log_scale: true
+    classifier__rf__min_weight_fraction_leaf:
+      type: range
+      bounds:
+      - 0.03
+      - 0.3
+      value_type: float
+      log_scale: true
+  space_constraints:
+    anova_leq_fa: preprocessing__kbest_anova__k >= feature_extraction__factor_analysis__n_components
+    kfilter_leq_anova: preprocessing__tuning_filter__k >= preprocessing__kbest_anova__k
+    tskip_geq_tint: preprocessing__rates_comp__t_int >= preprocessing__rates_comp__t_skip
+    constant_times: preprocessing__rates_comp__t_int + preprocessing__rates_comp__t_skip
+      <= 900
+
+[2020-12-31 11:17:09,612][__main__][INFO] - =========================================

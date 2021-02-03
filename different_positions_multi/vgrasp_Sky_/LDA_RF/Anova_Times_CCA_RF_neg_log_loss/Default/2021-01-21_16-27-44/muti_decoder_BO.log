@@ -1,0 +1,149 @@
+[2021-01-21 16:27:44,338][__main__][INFO] - ============= Configuration =============
+[2021-01-21 16:27:44,362][__main__][INFO] - Config:
+model: multiday_decoder
+base_optimization: true
+gen_strategy:
+  n_sobol: 40
+  n_gpei: 60
+metric_dict:
+  scorer:
+  - sklearn
+  - sklearn
+  - sklearn
+  score_fcn:
+  - neg_log_loss
+  - f1_weighted
+  - accuracy
+obj_name: neg_log_loss
+minimize: false
+data:
+  root_dir: C:\Users\u0142927\Desktop\NeuroscienceLeuven\RawData\MultiDaysDatasets\different_positions
+  n_days: 3
+  task_id: vgrasp_Sky_
+exp:
+  type: different_positions_multi
+  base_dir: C:\Users\u0142927\Desktop\NeuroscienceLeuven\Code
+  tracking:
+    root_dir: ${exp.base_dir}/experimentTracking
+    table_name: different_positions_multi.csv
+    save_metric: ${obj_name}
+reports:
+  base_folder: C:\Users\u0142927\Desktop\NeuroscienceLeuven\Code\bcidecode\bcidecode\reports
+  notebooks:
+  - OptReport
+  - EDA_Multi
+  params:
+  - root_dir: None
+  - root_dir: None
+    metric: ${exp.tracking.save_metric}
+    embedder: lda
+output_dir: ${hydra:run.dir}
+trial:
+  name: Default
+  params:
+    preprocessing__rates_comp__event: Target
+    preprocessing__rates_comp__t_skip: 163
+    preprocessing__rates_comp__t_int: 672
+    preprocessing__rates_comp__n_bins: 1
+    preprocessing__rates_comp__continuousDecoding: 0
+pipeline:
+  name: LDA_RF
+  pipeline_arch:
+    preprocessing:
+    - rates_comp
+    - tuning_filter
+    - scaler
+    - kbest_anova
+    feature_extraction:
+    - factor_analysis
+    - lda
+    classifier:
+    - rf
+optimization:
+  name: Anova_Times_CCA_RF
+  space:
+    preprocessing__kbest_anova__k:
+      type: range
+      bounds:
+      - 30
+      - 85
+      value_type: int
+      log_scale: false
+    feature_extraction__factor_analysis__n_components:
+      type: range
+      bounds:
+      - 2
+      - 25
+      value_type: int
+      log_scale: false
+    preprocessing__tuning_filter__k:
+      type: range
+      bounds:
+      - 60
+      - 100
+      value_type: int
+      log_scale: false
+    classifier__rf__max_depth:
+      type: range
+      bounds:
+      - 1
+      - 6
+      value_type: int
+      log_scale: false
+    classifier__rf__n_estimators:
+      type: range
+      bounds:
+      - 100
+      - 400
+      value_type: int
+      log_scale: false
+    classifier__rf__oob_score:
+      type: fixed
+      value: 1
+      value_type: bool
+      log_scale: false
+    classifier__rf__max_features:
+      type: choice
+      values:
+      - auto
+      - sqrt
+      - log2
+      value_type: str
+      log_scale: false
+    classifier__rf__min_impurity_decrease:
+      type: range
+      bounds:
+      - 0.01
+      - 2
+      value_type: float
+      log_scale: true
+    classifier__rf__min_weight_fraction_leaf:
+      type: range
+      bounds:
+      - 0.03
+      - 0.3
+      value_type: float
+      log_scale: true
+  space_constraints:
+    anova_leq_fa: preprocessing__kbest_anova__k >= feature_extraction__factor_analysis__n_components
+    kfilter_leq_anova: preprocessing__tuning_filter__k >= preprocessing__kbest_anova__k
+extensions:
+  name: Multi_CCA
+  align:
+    manifold_aligner: cca
+
+[2021-01-21 16:27:44,415][__main__][INFO] - =========================================
+[2021-01-21 16:28:12,604][numexpr.utils][INFO] - NumExpr defaulting to 8 threads.
+[2021-01-21 17:10:29,163][papermill][INFO] - Input Notebook:  C:\Users\u0142927\Desktop\NeuroscienceLeuven\Code\bcidecode\bcidecode\reports\OptReport.ipynb
+[2021-01-21 17:10:29,164][papermill][INFO] - Output Notebook: C:\Users\u0142927\Desktop\NeuroscienceLeuven\Code\outputs/different_positions_multi/vgrasp_Sky_/LDA_RF/Anova_Times_CCA_RF_neg_log_loss/Default/2021-01-21_16-27-44\OptReport.ipynb
+[2021-01-21 17:10:32,096][blib2to3.pgen2.driver][INFO] - Generating grammar tables from C:\GBW_MyPrograms\Anaconda3\envs\DecoderEnv\lib\site-packages\blib2to3\Grammar.txt
+[2021-01-21 17:10:32,155][blib2to3.pgen2.driver][INFO] - Writing grammar tables to C:\Users\u0142927\AppData\Local\black\black\Cache\20.8b1\Grammar3.8.5.final.0.pickle
+[2021-01-21 17:10:32,156][blib2to3.pgen2.driver][INFO] - Writing failed: [Errno 2] No such file or directory: 'C:\\Users\\u0142927\\AppData\\Local\\black\\black\\Cache\\20.8b1\\tmpd3adb2jd'
+[2021-01-21 17:10:32,157][blib2to3.pgen2.driver][INFO] - Generating grammar tables from C:\GBW_MyPrograms\Anaconda3\envs\DecoderEnv\lib\site-packages\blib2to3\PatternGrammar.txt
+[2021-01-21 17:10:32,161][blib2to3.pgen2.driver][INFO] - Writing grammar tables to C:\Users\u0142927\AppData\Local\black\black\Cache\20.8b1\PatternGrammar3.8.5.final.0.pickle
+[2021-01-21 17:10:32,163][blib2to3.pgen2.driver][INFO] - Writing failed: [Errno 2] No such file or directory: 'C:\\Users\\u0142927\\AppData\\Local\\black\\black\\Cache\\20.8b1\\tmpvsdl5p5u'
+[2021-01-21 17:10:38,793][papermill][INFO] - Executing notebook with kernel: python3
+[2021-01-21 17:13:54,706][papermill][WARNING] - Autosave too slow: 12.75 sec, over 25% limit. Backing off to 60 sec
+[2021-01-21 17:18:44,983][papermill][INFO] - Input Notebook:  C:\Users\u0142927\Desktop\NeuroscienceLeuven\Code\bcidecode\bcidecode\reports\EDA_Multi.ipynb
+[2021-01-21 17:18:44,983][papermill][INFO] - Output Notebook: C:\Users\u0142927\Desktop\NeuroscienceLeuven\Code\outputs/different_positions_multi/vgrasp_Sky_/LDA_RF/Anova_Times_CCA_RF_neg_log_loss/Default/2021-01-21_16-27-44\EDA_Multi.ipynb
+[2021-01-21 17:18:46,928][papermill][INFO] - Executing notebook with kernel: python3

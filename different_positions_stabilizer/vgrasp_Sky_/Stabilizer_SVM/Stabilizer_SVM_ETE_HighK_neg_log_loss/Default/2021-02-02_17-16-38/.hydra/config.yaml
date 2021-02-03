@@ -1,0 +1,145 @@
+model: stabilizer_decoder
+base_optimization: true
+base_dir: C:\Users\jesga\OneDrive\Desktop\NeuroscienceLeuven
+gen_strategy:
+  n_sobol: 35
+  n_gpei: 55
+metric_dict:
+  scorer:
+  - sklearn
+  - sklearn
+  - sklearn
+  score_fcn:
+  - neg_log_loss
+  - f1_weighted
+  - accuracy
+obj_name: neg_log_loss
+minimize: false
+load_path: C:\Users\u0142927\Desktop\NeuroscienceLeuven\Code\outputs\different_positions_stabilizer_base\vgrasp_Sky_\Stabilizer_Base_SVM\Stabilizer_Base_SVM_neg_log_loss\Default\2021-01-29_13-45-50
+data:
+  root_dir: ${base_dir}/RawData/MultiDaysDatasets/different_positions
+  base_data:
+  - 20200703_0936_A_trials
+  used_datasets:
+  - 20200706_1100_C_trials
+  - 20200707_1047_C_trials
+  n_days: 2
+  task_id: vgrasp_Sky_
+exp:
+  type: different_positions_stabilizer
+  base_dir: ${base_dir}/Code
+  tracking:
+    root_dir: ${exp.base_dir}/experimentTracking
+    table_name: different_positions_multi.csv
+    save_metric: ${obj_name}
+reports:
+  base_folder: ${base_dir}/Code/bcidecode/bcidecode/reports
+  notebooks:
+  - OptReport
+  - StabilizerReport
+  params:
+  - root_dir: None
+  - root_dir: None
+    metric: ${exp.tracking.save_metric}
+    mother_dir: ${base_dir}
+output_dir: ${hydra:run.dir}
+trial:
+  name: Default
+  params:
+    preprocessing__rates_comp__event: Target
+    preprocessing__rates_comp__t_skip: 194.93
+    preprocessing__rates_comp__t_int: 705.07
+    preprocessing__rates_comp__n_bins: 1
+    preprocessing__rates_comp__continuousDecoding: 0
+pipeline:
+  name: Stabilizer_SVM
+  pipeline_arch:
+    base_decoder:
+      preprocessing:
+      - rates_comp
+      - tuning_filter
+      - scaler
+      - kbest_anova
+      feature_extraction:
+      - factor_analysis
+      classifier:
+      - svm
+    base_manifold:
+      preprocessing:
+      - rates_comp
+      - concat_transformer
+      - scaler
+      feature_extraction:
+      - factor_analysis
+    decoder:
+      preprocessing:
+      - rates_comp
+      - concat_transformer
+      - scaler
+    manifold:
+      preprocessing:
+      - rates_comp
+      - concat_transformer
+      - scaler
+      feature_extraction:
+      - fa_stabilizer
+optimization:
+  name: Stabilizer_SVM_ETE_HighK
+  space:
+    preprocessing__tuning_filter__k:
+      type: range
+      bounds:
+      - 100
+      - 128
+      value_type: int
+      log_scale: false
+    preprocessing__kbest_anova__k:
+      type: range
+      bounds:
+      - 100
+      - 128
+      value_type: int
+      log_scale: false
+    feature_extraction__factor_analysis__n_components:
+      type: range
+      bounds:
+      - 10
+      - 20
+      value_type: int
+      log_scale: false
+    classifier__svm__C:
+      type: range
+      bounds:
+      - 0.1
+      - 100
+      value_type: float
+      log_scale: true
+    classifier__svm__gamma:
+      type: range
+      bounds:
+      - 0.0001
+      - 10
+      value_type: float
+      log_scale: true
+    classifier__svm__probability:
+      type: fixed
+      value: true
+      value_type: bool
+    feature_extraction__fa_stabilizer__n_stable_ch:
+      type: range
+      bounds:
+      - 35
+      - 80
+      value_type: int
+      log_scale: false
+    feature_extraction__fa_stabilizer__threshold:
+      type: range
+      bounds:
+      - 0.0001
+      - 0.3
+      value_type: float
+      log_scale: true
+  space_constraints:
+    anova_leq_fa: preprocessing__kbest_anova__k >= feature_extraction__factor_analysis__n_components
+    kfilter_leq_anova: preprocessing__tuning_filter__k >= preprocessing__kbest_anova__k
+    constant_times: preprocessing__kbest_anova__k >= feature_extraction__fa_stabilizer__n_stable_ch
